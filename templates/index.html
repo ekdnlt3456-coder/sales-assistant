@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLOW 영업 어시스턴트</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0f;
+  --surface:#17171a;
+  --surface2:#1e1e22;
+  --border:#2a2a30;
+  --border2:#38383f;
+  --text:#f0f0f0;
+  --text2:#9a9aaa;
+  --text3:#5a5a6a;
+  --accent:#3b82f6;
+  --accent-bg:rgba(59,130,246,0.1);
+  --accent-border:rgba(59,130,246,0.3);
+  --green:#22c55e;
+  --green-bg:rgba(34,197,94,0.1);
+  --amber:#f59e0b;
+  --amber-bg:rgba(245,158,11,0.1);
+  --red:#ef4444;
+  --red-bg:rgba(239,68,68,0.1);
+  --radius:8px;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:1.6;min-height:100vh}
+
+/* 헤더 */
+.header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg);z-index:100}
+.logo{font-size:16px;font-weight:700;letter-spacing:-0.5px;color:#fff}
+.logo span{color:var(--accent)}
+.header-sub{font-size:12px;color:var(--text3)}
+
+/* 탭 */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:53px;z-index:99}
+.tab{flex:1;padding:12px 8px;font-size:13px;text-align:center;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;transition:color 0.15s}
+.tab.active{color:#fff;border-bottom-color:var(--accent)}
+
+/* 레이아웃 */
+.panel{display:none;padding:16px}
+.panel.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+.card-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+
+/* 폼 */
+label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color 0.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:70px}
+select option{background:var(--surface2)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.field{margin-bottom:10px}
+
+/* 버튼 */
+.btn{display:block;width:100%;padding:11px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:opacity 0.15s}
+.btn:active{opacity:0.8}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-outline{background:none;border:1px solid var(--border2);color:var(--text);padding:8px 14px;width:auto;font-size:13px}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:6px;cursor:pointer;border:1px solid var(--border2);background:none;color:var(--text2);font-family:inherit}
+.btn-danger-sm{border-color:rgba(239,68,68,0.3);color:var(--red)}
+
+/* 결과 박스 */
+.result{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;margin-top:12px;font-size:13px;line-height:1.75;color:var(--text);white-space:pre-wrap;display:none;position:relative}
+.result.show{display:block}
+.copy-btn{position:absolute;top:10px;right:10px;padding:4px 10px;font-size:11px;border-radius:5px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text2)}
+.loading-txt{color:var(--text3);font-size:13px;text-align:center;padding:20px 0}
+
+/* 칩 */
+.chip-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{padding:6px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all 0.15s}
+.chip.sel{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+
+/* 고객 */
+.client-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.client-item:last-child{border-bottom:none}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--accent);flex-shrink:0}
+.client-name{font-size:14px;font-weight:500;margin-bottom:3px}
+.client-meta{font-size:12px;color:var(--text2);margin-bottom:3px}
+.client-memo{font-size:12px;color:var(--text3)}
+.badge{display:inline-block;font-size:11px;padding:2px 7px;border-radius:4px;font-weight:500;margin-left:6px}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.amount-tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);margin-left:4px}
+
+/* 헤더 액션 */
+.list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.list-header h2{font-size:14px;font-weight:600}
+
+/* 빈 상태 */
+.empty{text-align:center;padding:30px 0;color:var(--text3);font-size:13px}
+
+/* 모바일 최적화 */
+@media(max-width:400px){
+  .row{grid-template-columns:1fr}
+  .tab{font-size:11px;padding:12px 4px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">FLOW <span>영업</span></div>
+  <div class="header-sub">주식·코인 선물 영업 어시스턴트</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('consult',this)">📊 종목상담</button>
+  <button class="tab" onclick="switchTab('portfolio',this)">💼 포트폴리오</button>
+  <button class="tab" onclick="switchTab('script',this)">💬 대응멘트</button>
+  <button class="tab" onclick="switchTab('clients',this)">👥 고객관리</button>
+</div>
+
+<!-- 종목 상담 -->
+<div id="panel-consult" class="panel active">
+  <div class="card">
+    <div class="card-title">종목 정보</div>
+    <div class="row">
+      <div><label>종목명 / 코인</label><input type="text" id="ticker" placeholder="BTC, 삼성전자, 엔비디아..."></div>
+      <div><label>시장 유형</label>
+        <select id="market">
+          <option value="coin">코인 선물</option>
+          <option value="domestic">국내 주식</option>
+          <option value="us">미국 주식</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div><label>진입 상황</label>
+        <select id="position">
+          <option value="none">미진입 (신규 추천)</option>
+          <option value="long">롱 진입 중</option>
+          <option value="short">숏 진입 중</option>
+          <option value="loss">손실 중</option>
+        </select>
+      </div>
+      <div><label>고객 성향</label>
+        <select id="style">
+          <option value="aggressive">공격형</option>
+          <option value="moderate">중립형</option>
+          <option value="conservative">안정형</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>추가 상황 메모</label><textarea id="consult-memo" placeholder="예: 지지선 근처, 고객이 불안해함..."></textarea></div>
+    <button class="btn btn-accent" onclick="runConsult()">✦ AI 영업 멘트 생성</button>
+  </div>
+  <div id="consult-result" class="result"><button class="copy-btn" onclick="copyResult('consult-result')">복사</button><span id="consult-text"></span></div>
+</div>
+
+<!-- 포트폴리오 -->
+<div id="panel-portfolio" class="panel">
+  <div class="card">
+    <div class="card-title">고객 조건</div>
+    <div class="row">
+      <div><label>투자 자금 (만원)</label><input type="number" id="capital" placeholder="1000"></div>
+      <div><label>투자 성향</label>
+        <select id="pt-style">
+          <option value="aggressive">공격형 (고수익)</option>
+          <option value="moderate">중립형 (균형)</option>
+          <option value="conservative">안정형 (저위험)</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div><label>투자 기간</label>
+        <select id="period">
+          <option value="short">단기 (1~4주)</option>
+          <option value="mid">중기 (1~3개월)</option>
+          <option value="long">장기 (3개월+)</option>
+        </select>
+      </div>
+      <div><label>선호 시장</label>
+        <select id="pt-market">
+          <option value="coin">코인 위주</option>
+          <option value="stock">주식 위주</option>
+          <option value="mixed">혼합</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>관심 / 제외 종목</label><input type="text" id="pt-memo" placeholder="예: BTC 포함 원함, 잡코인 제외"></div>
+    <button class="btn btn-accent" onclick="runPortfolio()">✦ AI 포트폴리오 구성</button>
+  </div>
+  <div id="portfolio-result" class="result"><button class="copy-btn" onclick="copyResult('portfolio-result')">복사</button><span id="portfolio-text"></span></div>
+</div>
+
+<!-- 대응 멘트 -->
+<div id="panel-script" class="panel">
+  <div class="card">
+    <div class="card-title">고객 상황 선택</div>
+    <div class="chip-grid">
+      <div class="chip sel" onclick="selectSit(this,'손실이 났는데 어떻게 해야 하냐고 따짐')">😤 손실 따짐</div>
+      <div class="chip" onclick="selectSit(this,'지금 팔아야 하냐고 물어봄')">🤔 매도 타이밍</div>
+      <div class="chip" onclick="selectSit(this,'추가 진입해야 하냐고 물어봄')">💰 추가 진입</div>
+      <div class="chip" onclick="selectSit(this,'다른 종목으로 갈아타야 하냐고 물어봄')">🔄 종목 교체</div>
+      <div class="chip" onclick="selectSit(this,'왜 아직도 안 오르냐며 불만을 표출함')">😡 불만 표출</div>
+      <div class="chip" onclick="selectSit(this,'원금 언제 회복되냐고 물어봄')">⏳ 원금 회복</div>
+      <div class="chip" onclick="selectSit(this,'그냥 다 빼겠다고 환불 요청함')">🚪 이탈 위기</div>
+      <div class="chip" onclick="selectSit(this,'수익이 나서 지인 소개 고려 중임')">🤝 소개 의향</div>
+      <div class="chip" onclick="selectSit(this,'신규 고객인데 믿어도 되냐고 탐색 중임')">🆕 신규 탐색</div>
+      <div class="chip" onclick="selectSit(this,'레버리지를 더 높이고 싶다고 요청함')">📈 레버리지 요청</div>
+    </div>
+    <div class="field"><label>직접 입력 (선택)</label><input type="text" id="custom-sit" placeholder="고객 상황을 직접 설명"></div>
+    <div class="field"><label>대응 톤</label>
+      <select id="tone">
+        <option value="calm">차분하고 신뢰감 있게</option>
+        <option value="empathy">공감하며 다독이는 톤</option>
+        <option value="confident">자신감 있게 강하게</option>
+        <option value="friendly">친근하고 편하게</option>
+      </select>
+    </div>
+    <button class="btn btn-accent" onclick="runScript()">✦ AI 대응 멘트 생성 (3가지)</button>
+  </div>
+  <div id="script-result" class="result"><button class="copy-btn" onclick="copyResult('script-result')">복사</button><span id="script-text"></span></div>
+</div>
+
+<!-- 고객 관리 -->
+<div id="panel-clients" class="panel">
+  <div class="list-header">
+    <h2>고객 목록 <span id="client-count" style="color:var(--text3);font-weight:400"></span></h2>
+    <button class="btn-outline" onclick="toggleForm()">+ 고객 추가</button>
+  </div>
+
+  <div id="add-form" style="display:none" class="card">
+    <div class="card-title">신규 고객 등록</div>
+    <div class="row">
+      <div><label>이름 *</label><input type="text" id="c-name" placeholder="홍길동"></div>
+      <div><label>연락처</label><input type="text" id="c-phone" placeholder="010-0000-0000"></div>
+    </div>
+    <div class="row">
+      <div><label>상태</label>
+        <select id="c-status">
+          <option value="active">활성 고객</option>
+          <option value="pending">검토 중</option>
+          <option value="inactive">이탈</option>
+        </select>
+      </div>
+      <div><label>투자 금액 (만원)</label><input type="number" id="c-amount" placeholder="500"></div>
+    </div>
+    <div class="field"><label>추천 종목</label><input type="text" id="c-picks" placeholder="BTC, 삼성전자..."></div>
+    <div class="field"><label>메모</label><textarea id="c-memo" style="min-height:60px" placeholder="성향, 특이사항, 대화 내용..."></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-accent" style="flex:1" onclick="saveClient()">저장</button>
+      <button class="btn-outline" onclick="toggleForm()">취소</button>
+    </div>
+  </div>
+
+  <div class="card" style="padding:8px 16px">
+    <div id="client-list"><div class="empty">고객을 추가해보세요</div></div>
+  </div>
+</div>
+
+<script>
+let selectedSit = '손실이 났는데 어떻게 해야 하냐고 따짐';
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function selectSit(el, val) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedSit = val;
+}
+
+function toggleForm() {
+  const f = document.getElementById('add-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function showLoading(id) {
+  const el = document.getElementById(id);
+  el.classList.add('show');
+  document.getElementById(id.replace('-result','-text')||id).textContent = '';
+  el.querySelector('span').textContent = 'AI가 분석 중입니다...';
+  el.querySelector('span').style.color = 'var(--text3)';
+}
+
+function showResult(id, text) {
+  const el = document.getElementById(id);
+  el.classList.add('show');
+  const span = el.querySelector('span');
+  span.textContent = text;
+  span.style.color = 'var(--text)';
+}
+
+function copyResult(id) {
+  const text = document.getElementById(id).querySelector('span').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(id).querySelector('.copy-btn');
+    btn.textContent = '복사됨!';
+    setTimeout(() => btn.textContent = '복사', 1500);
+  });
+}
+
+async function callAI(prompt) {
+  const res = await fetch('/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.content;
+}
+
+async function runConsult() {
+  const ticker = document.getElementById('ticker').value.trim();
+  if (!ticker) { alert('종목명을 입력하세요'); return; }
+  const market = document.getElementById('market');
+  const position = document.getElementById('position');
+  const style = document.getElementById('style');
+  const memo = document.getElementById('consult-memo').value;
+  showLoading('consult-result');
+  try {
+    const result = await callAI(`당신은 주식/코인 선물 트레이딩 전문 영업 어시스턴트입니다.
+다음 상황에 맞는 전문적이고 설득력 있는 한국어 영업 멘트를 작성해주세요.
+
+종목: ${ticker}
+시장: ${market.options[market.selectedIndex].text}
+진입 상황: ${position.options[position.selectedIndex].text}
+고객 성향: ${style.options[style.selectedIndex].text}
+추가 상황: ${memo || '없음'}
+
+다음 형식으로 작성:
+1. 현재 시장 관점 (2~3줄, 기술적 분석 톤으로 자신감 있게)
+2. 이 종목 추천 이유 (3~4줄, 구체적 근거 포함)
+3. 리스크 관리 포인트 (1~2줄)
+4. 마무리 클로징 멘트 (1~2줄, 신뢰감 있게)
+
+실제 트레이더가 고객에게 카카오톡으로 보내는 스타일로, 전문적이면서도 자연스러운 한국어로 작성하세요.`);
+    showResult('consult-result', result);
+  } catch(e) { showResult('consult-result', '오류: ' + e.message); }
+}
+
+async function runPortfolio() {
+  const cap = document.getElementById('capital').value;
+  if (!cap) { alert('투자 자금을 입력하세요'); return; }
+  const ptStyle = document.getElementById('pt-style');
+  const period = document.getElementById('period');
+  const ptMarket = document.getElementById('pt-market');
+  const memo = document.getElementById('pt-memo').value;
+  showLoading('portfolio-result');
+  try {
+    const result = await callAI(`당신은 주식/코인 포트폴리오 전문가입니다.
+다음 조건에 맞는 포트폴리오 구성안과 고객 설명 멘트를 작성해주세요.
+
+투자 자금: ${cap}만원
+투자 성향: ${ptStyle.options[ptStyle.selectedIndex].text}
+투자 기간: ${period.options[period.selectedIndex].text}
+선호 시장: ${ptMarket.options[ptMarket.selectedIndex].text}
+특이사항: ${memo || '없음'}
+
+[포트폴리오 구성]
+종목별 배분 (종목명 + 비중% + 배분금액) 형식으로
+전략 요약 포함
+
+[고객 설명 멘트]
+카카오톡으로 전달하는 스타일로 자연스럽고 설득력 있게 한국어로 작성`);
+    showResult('portfolio-result', result);
+  } catch(e) { showResult('portfolio-result', '오류: ' + e.message); }
+}
+
+async function runScript() {
+  const custom = document.getElementById('custom-sit').value.trim();
+  const sit = custom || selectedSit;
+  const tone = document.getElementById('tone');
+  showLoading('script-result');
+  try {
+    const result = await callAI(`당신은 주식/코인 선물 트레이딩 영업 전문가입니다.
+다음 고객 상황에서 바로 쓸 수 있는 대응 멘트를 작성해주세요.
+
+고객 상황: ${sit}
+대응 톤: ${tone.options[tone.selectedIndex].text}
+
+요구사항:
+- 카카오톡/문자로 바로 보낼 수 있는 자연스러운 한국어
+- 고객 감정 인정 + 신뢰 유지
+- 5~8줄 이내
+- 다음 단계로 이어질 수 있도록
+- A안 / B안 / C안 3가지 버전으로 작성`);
+    showResult('script-result', result);
+  } catch(e) { showResult('script-result', '오류: ' + e.message); }
+}
+
+// 고객 관리
+async function loadClients() {
+  try {
+    const res = await fetch('/api/clients');
+    const clients = await res.json();
+    renderClients(clients);
+  } catch(e) { console.error(e); }
+}
+
+function renderClients(clients) {
+  const el = document.getElementById('client-list');
+  const count = document.getElementById('client-count');
+  count.textContent = clients.length ? `(${clients.length}명)` : '';
+  if (!clients.length) {
+    el.innerHTML = '<div class="empty">등록된 고객이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = clients.map(c => `
+    <div class="client-item">
+      <div class="avatar">${c.name[0]}</div>
+      <div style="flex:1;min-width:0">
+        <div class="client-name">
+          ${c.name}
+          <span class="badge ${c.status==='active'?'badge-green':c.status==='pending'?'badge-amber':'badge-red'}">${c.status==='active'?'활성':c.status==='pending'?'검토중':'이탈'}</span>
+          ${c.amount ? `<span class="amount-tag">${c.amount}만원</span>` : ''}
+        </div>
+        ${c.phone || c.picks ? `<div class="client-meta">${[c.phone, c.picks].filter(Boolean).join(' · ')}</div>` : ''}
+        ${c.memo ? `<div class="client-memo">${c.memo}</div>` : ''}
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${c.created_at || ''}</div>
+      </div>
+      <button class="btn-sm btn-danger-sm" onclick="deleteClient(${c.id})">삭제</button>
+    </div>
+  `).join('');
+}
+
+async function saveClient() {
+  const name = document.getElementById('c-name').value.trim();
+  if (!name) { alert('이름을 입력하세요'); return; }
+  try {
+    const res = await fetch('/api/clients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        phone: document.getElementById('c-phone').value,
+        status: document.getElementById('c-status').value,
+        amount: document.getElementById('c-amount').value,
+        picks: document.getElementById('c-picks').value,
+        memo: document.getElementById('c-memo').value
+      })
+    });
+    if (!res.ok) throw new Error('저장 실패');
+    ['c-name','c-phone','c-amount','c-picks','c-memo'].forEach(id => document.getElementById(id).value = '');
+    toggleForm();
+    loadClients();
+  } catch(e) { alert('저장 실패: ' + e.message); }
+}
+
+async function deleteClient(id) {
+  if (!confirm('삭제할까요?')) return;
+  try {
+    await fetch('/api/clients/' + id, { method: 'DELETE' });
+    loadClients();
+  } catch(e) { alert('삭제 실패'); }
+}
+
+loadClients();
+</script>
+</body>
+</html>
