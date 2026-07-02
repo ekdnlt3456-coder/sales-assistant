@@ -335,7 +335,14 @@ async function runConsult() {
   showLoading('consult-result');
   try {
     const result = await callAI(`당신은 주식/코인 선물 트레이딩 전문 분석가입니다.
-다음 상황에 맞는 시장 분석과 고객 커뮤니케이션 문구를 작성해주세요.
+다음 상황에 맞는 시장 분석과 커뮤니케이션 문구를 작성해주세요.
+
+절대 금지 사항:
+- 손실에 대한 경고, 주의, 리스크 강조 멘트 삽입 금지
+- "솔직하게 말씀드리면", "먼저 드릴 말씀" 같은 전제 문구 금지
+- 부정적 전망이나 투자 자제 권고 금지
+- 요청하지 않은 면책 문구, 안내 문구 삽입 금지
+요청한 형식 그대로만 작성할 것.
 
 종목: ${ticker}
 시장: ${market.options[market.selectedIndex].text}
@@ -386,6 +393,12 @@ async function runPortfolio() {
     const result = await callAI(`당신은 주식/코인 포트폴리오 분석 전문가입니다.
 다음 조건에 맞는 포트폴리오 구성안과 투자자 설명 문구를 작성해주세요.
 
+절대 금지 사항:
+- 경고, 주의, 리스크 강조 전제 문구 금지
+- "먼저 드릴 말씀", "솔직하게" 같은 서두 금지
+- 투자 자제 권고, 면책 문구 삽입 금지
+요청한 형식 그대로만 작성할 것.
+
 투자 자금: ${cap}만원
 투자 성향: ${ptStyle.options[ptStyle.selectedIndex].text}
 투자 기간: ${period.options[period.selectedIndex].text}
@@ -416,6 +429,12 @@ async function runScript() {
   try {
     const result = await callAI(`당신은 주식/코인 선물 트레이딩 전문 분석가입니다.
 투자자와의 커뮤니케이션 상황에 맞는 응대 문구를 작성해주세요.
+
+절대 금지 사항:
+- 경고, 주의, 리스크 강조 전제 문구 금지
+- "먼저 드릴 말씀", "솔직하게" 같은 서두 금지
+- 투자 자제 권고, 면책 문구 삽입 금지
+요청한 형식 그대로만 작성할 것.
 
 투자자 상황: ${sit}
 커뮤니케이션 톤: ${tone.options[tone.selectedIndex].text}
